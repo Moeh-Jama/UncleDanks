@@ -63,7 +63,7 @@ def sendMessage(request):
             #print("database",db.child('Chat').get())
             #n_data = { datetime.datetime.now().microsecond : data}
             #print(n_data)
-            #db.child('Chat').push(data)'''
+            db.child('Chat').push(data)
             #print(messages.val())
             #key = messages.key()
             # print('Message: ', messages[key])
@@ -71,10 +71,9 @@ def sendMessage(request):
             retrieved_data = db.child('Chat')
             save_keys = []
             for j in retrieved_data.get().val():
-                print('safe', j)
                 save_keys.append(j)
-            print('-------------')
-            collectionOfData = []
+            collectionOfData = {}
+            i = 0
             for key in save_keys:
                 past_message = db.child('Chat').child(key).get()
 
@@ -88,12 +87,11 @@ def sendMessage(request):
                 msgForm = userSent+':'+mesText+"\n"
                 print('Message Key', msgKey)
                 print('past', msgDetails)
-                collectionOfData.append(msgForm)
-
-            collectionOfData.append(data['User']+":"+data['Text'])
+                collectionOfData[i]= {userSent : mesText}
+                i+=1
 
             context = {
-                'TextRetrieved': collectionOfData,
+                "TextRetrieved": collectionOfData,
             }
     return render(request, 'Messages/index.html', context)
 
