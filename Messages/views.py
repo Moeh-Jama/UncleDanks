@@ -36,12 +36,6 @@ def index(request):
     #Set up database configurations
     context = {}
     config = {
-        "apiKey": "AIzaSyCLKnXHfD4mqCifYwA9Fm8PCiXaNZqDtkA",
-        "authDomain": "moehsmessagingapp.firebaseapp.com",
-        "databaseURL": "https://moehsmessagingapp.firebaseio.com",
-        "projectId": "moehsmessagingapp",
-        "storageBucket": "moehsmessagingapp.appspot.com",
-        "messagingSenderId": "529929215823"
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -111,12 +105,6 @@ def directMessaging(request):
         "other_user": full_user,
     }
     config = {
-        "apiKey": "AIzaSyCLKnXHfD4mqCifYwA9Fm8PCiXaNZqDtkA",
-        "authDomain": "moehsmessagingapp.firebaseapp.com",
-        "databaseURL": "https://moehsmessagingapp.firebaseio.com",
-        "projectId": "moehsmessagingapp",
-        "storageBucket": "moehsmessagingapp.appspot.com",
-        "messagingSenderId": "529929215823"
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -178,12 +166,6 @@ def directMessaging(request):
 def sendDirect(request):
     current_user = request.user.username
     config = {
-        "apiKey": "AIzaSyCLKnXHfD4mqCifYwA9Fm8PCiXaNZqDtkA",
-        "authDomain": "moehsmessagingapp.firebaseapp.com",
-        "databaseURL": "https://moehsmessagingapp.firebaseio.com",
-        "projectId": "moehsmessagingapp",
-        "storageBucket": "moehsmessagingapp.appspot.com",
-        "messagingSenderId": "529929215823"
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
