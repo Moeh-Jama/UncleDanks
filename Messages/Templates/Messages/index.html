@@ -4,6 +4,7 @@
             <title>UncleDanks</title>
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
             <script src="https://www.gstatic.com/firebasejs/3.0.0/firebase.js"></script>
+                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
             <script src="jquery-3.3.1.min.js"></script>
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         </head>
@@ -23,18 +24,19 @@
             <div class="container text-center">
                 <header>
                     <h1>Welcome to Moehs Messaging App</h1>
-                    
-                    <u>
-                         {% for user in  UserList %}
-                             <li>{{user}}</li>
-                         {% endfor %}
-                    </u>
-                    <form action="{% url 'directMessaging' %}" method="get">
-                        {% csrf_token %}
-                        <label>Enter the name of one of the users to message!</label>
-                        <input type="text" placeholder="username" name="UserEntry">
-                        <input type="submit" value="Enter">
-                    </form>
+                    <nav class="navbar navbar-default">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                            <a class="navbar-brand" href="#">WebSiteName</a>
+                            </div>
+                            <ul class="nav navbar-nav">
+                            <li class="active"><a href="#">Home</a></li>
+                            <li><a href="#">Page 1</a></li>
+                            <li><a href="#">Page 2</a></li>
+                            <li><a href="#">Page 3</a></li>
+                            </ul>
+                        </div>
+                    </nav>
                 </header>
                 <div id="mainBody">
                     <div id="Messages">
@@ -45,38 +47,37 @@
                             {% for key, value in TextRetrieved.items %}
                                 <div class="card-body">
                                 {% for k, v in value.items  %}
-                                    {% if 'https:' in  v %}
-                                        {% if '.jpg' in v or '.png' in v %}
-                                            <div class="d-flex p-2"><strong>{{ k }} :</strong>
-                                            <a href="{{ v }}"><img src="{{ v }}" alt="user Sent Image" height="100"></a>
-                                            </div>
-                                        {% elif '.gif' in v and '#' not in v %}
-                                            <div class="d-flex p-2"><strong>{{ k }} :</strong>
-                                            <a href="{{ v }}"><img src="{{ v }}" alt="user Sent Gif"></a>
-                                            </div>
-                                        {% elif '.mp4' in v %}
-                                            <video width="400" controls>
-                                          		<source src="{{v}}" type="video/mp4">
-                                         	    Your browser does not support HTML5 video.
-                                        	</video>
-                                        {% else %}
-                                            <div class="d-flex p-2"><strong>{{ k }} :</strong>
-                                            <a href="{{ v }}">{{ v }}</a>
-                                        </div>
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="d-flex p-2"><strong>{{ k }} :</strong> {{ v }}</div>
-                                    {% endif %}
+                                       <div class="d-flex p-2"><strong>{{ k }} :</strong> {{ v.message }}</div>
+                                       {% if "message_info" in v %}
+                                           {% if v.message_info.type == 'image' %}
+                                                <div class="d-flex p-2"><strong>{{ k }} :</strong> <a href="{{ v.message_info.link }}"><img src="{{ v.message_info.link }}" height="250"/></a></div>
+
+                                           {% elif v.message_info.type == "video" %}
+                                                <div class="d-flex p-2"><strong>{{ k }} :</strong>
+                                                    <a href="{{ v.message_info.link }}">
+                                               <video width="400" controls>
+                                                  <source src="{{ v.message_info.link }}" type="video/mp4">
+                                                  <source src="{{ v.message_info.link }}" type="video/ogg">
+                                                  Your browser does not support HTML5 video.
+                                                </video>
+                                                    </a>
+
+                                                </div>
+                                           {% elif v.message_info.type == "gif" %}
+                                                <div class="d-flex p-2"><strong>{{ k }} :</strong> <a href="{{ v.message_info.link }}"><img src="{{ v.message_info.link }}" height="250"/></a></div>
+
+                                           {% endif %}
+                                       {% endif %}
                                 {% endfor %}
                                 </div>
                             {% endfor %}
                             </div>
                         </div>
-                    <form method="post" id="myForm" class="form-group" action="{% url 'sendMessage' %}">
+                    <form method="post" id="myForm" class="form-group" action="{% url 'index' %}">
                         <p>Say something {{ user.username }}!</p>
                         {% csrf_token %}
                         <input type="textera" name="enteredMessage" id="messageSent" placeholder="Enter your message here!">
-                        <input type="submit" onClick="addMessage()" name="submit" value="Enter">
+                        <input type="submit" name="submit" value="Enter">
                     </form>
                     <a href="{%  url 'logout' %}"><p class="btn btn-lg btn-danger btn-block">Logout</p></a>
                     {% else %}

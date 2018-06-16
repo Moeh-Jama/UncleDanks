@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth  import authenticate, login
 from django.contrib.auth.models import User
-
+from django.utils.safestring import SafeString
 from django.http import HttpResponse
 
+from . import message_data
 
 
 import datetime
@@ -12,8 +13,28 @@ import pyrebase
 full_user = ""
 iterations = -10
 
+def sendMessageFunc(request):
+    message_sent = request.POST.get('enteredMessage')
+    #Format message
+    if message_sent != '' and message_sent.strip() != '':
+        #current time
+        message_formated = message_data.parseMessage(message_sent)
+        current_time = str(datetime.datetime.now())
+        user = request.user.username
+        data = {
+            'User': request.user.username,
+            'Time': current_time,
+            'Text': message_formated
+        }
+        print('Message to be pushed: ', data)
+        return data
+    else:
+        return None
+
 # Create your views here.
 def index(request):
+    #Set up database configurations
+    context = {}
     config = {
         "apiKey": "AIzaSyCLKnXHfD4mqCifYwA9Fm8PCiXaNZqDtkA",
         "authDomain": "moehsmessagingapp.firebaseapp.com",
@@ -24,10 +45,11 @@ def index(request):
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
-    # print('The database is below')
-    # print(db.get())
-    # print("database",db.child('Chat').get())
-    # n_data = { datetime.datetime.now().microsecond : data}
+    if request.method == 'POST':
+        data = sendMessageFunc(request)
+        if data!=None:
+            db.child('Chat').push(data)
+    #retrieve main_chat
     retrieved_data = db.child('Chat')
     save_keys = []
     for j in retrieved_data.get().val():
@@ -42,12 +64,9 @@ def index(request):
         print('Sent by', msgDetails)
 
         userSent = msgDetails['User']
-        mesText = msgDetails['Text']
-        print(userSent, mesText)
-        msgForm = userSent + ':' + mesText + "\n"
-        print('Message Key', msgKey)
-        print('past', msgDetails)
-        collectionOfData[i] = {userSent: mesText}
+        msgDetails['Text']
+
+        collectionOfData[i] = {userSent: msgDetails['Text']}
         i += 1
     users = User.objects.all()
     context = {
@@ -55,67 +74,6 @@ def index(request):
         "UserList": users,
     }
     return render(request, 'Messages/index.html', context)
-
-
-
-def sendMessage(request):
-    config = {
-        "apiKey": "AIzaSyCLKnXHfD4mqCifYwA9Fm8PCiXaNZqDtkA",
-        "authDomain": "moehsmessagingapp.firebaseapp.com",
-        "databaseURL": "https://moehsmessagingapp.firebaseio.com",
-        "projectId": "moehsmessagingapp",
-        "storageBucket": "moehsmessagingapp.appspot.com",
-        "messagingSenderId": "529929215823"
-    }
-    firebase = pyrebase.initialize_app(config)
-    db = firebase.database()
-    context = {
-        'Message':'You entered a message!'
-    }
-    context = {}
-    print('Begin to check post')
-    if request.method == 'POST':
-        message_sent = request.POST.get('enteredMessage')
-        #Format message
-        if message_sent != '' and message_sent.strip() != '':
-            #current time
-            current_time = str(datetime.datetime.now())
-            #print('time: ', current_time)
-            user = request.user.username
-            data = {
-                'User': request.user.username,
-                'Time': current_time,
-                'Text': message_sent
-            }
-            db.child('Chat').push(data)
-            retrieved_data = db.child("Chat")
-            save_keys = []
-            count =0
-            for j in retrieved_data.get().val():
-                save_keys.append(j)
-                count+=1
-            collectionOfData = {}
-            i = 0
-            #get the last 10 messages
-            for key in save_keys[iterations:]:
-                past_message = db.child('Chat').child(key).get()
-
-                msgKey = past_message.key()
-                msgDetails = dict(past_message.val())
-                #print('Sent by', msgDetails)
-
-                userSent = msgDetails['User']
-                mesText = msgDetails['Text']
-                msgForm = userSent+':'+mesText+"\n"
-                collectionOfData[i]= {userSent : mesText}
-                i+=1
-
-            context = {
-                "TextRetrieved": collectionOfData,
-            }
-            redirect('index')
-    return render(request, 'Messages/index.html', context)
-
 
 def register(request):
     if request.method == 'POST':
@@ -192,10 +150,7 @@ def directMessaging(request):
 
                 msgKey = past_message.key()
                 msgDetails = dict(past_message.val())
-                print('Sent by', msgDetails)
-                print(msgDetails)
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-                print(chatName)
+
                 userSent = ''
                 if 'User' in msgDetails:
                     userSent = msgDetails['User']
